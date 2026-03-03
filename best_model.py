@@ -306,7 +306,7 @@ if __name__ == "__main__":
     final_accumulation_steps = 4   
     
     # Load data
-    train_dataset = TrajectoryDataset("/scratch/DL24FA/train/states.npy", "/scratch/DL24FA/train/actions.npy")
+    train_dataset = TrajectoryDataset("data/train/states.npy", "data/train/actions.npy")
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
     
     model = JEPA(state_dim=state_dim, action_dim=action_dim, hidden_dim=hidden_dim, cnn_channels=cnn_channels).to(device)
@@ -321,13 +321,14 @@ if __name__ == "__main__":
     loss_history = []
 
     model.train()
+    start = time.perf_counter()
     for epoch in range(epochs):
         total_loss = 0.0
         optimizer.zero_grad()
         
         accumulation_steps = max(final_accumulation_steps, initial_accumulation_steps - (initial_accumulation_steps - final_accumulation_steps) * epoch // epochs)
         for step, (states, actions) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}")):
-            t0 = time.time()
+            # t0 = time.time()
             states = states.to(device)
             actions = actions.to(device)
 
@@ -371,8 +372,8 @@ if __name__ == "__main__":
                 elif device == 'cuda':
                     torch.cuda.synchronize()
 
-                t1 = time.time()
-                dt = (t1 - t0) * 1000
+                # t1 = time.time()
+                # dt = (t1 - t0) * 1000
 
             total_loss += loss.item()
             loss_history.append(loss.item())
@@ -381,7 +382,10 @@ if __name__ == "__main__":
         
         avg_loss = total_loss / len(train_loader)
         print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
-
+    
+    end = time.perf_counter()
+    time_taken = end - start
+    
     # Plot the loss over time
     plt.figure()
     plt.plot(range(1, len(loss_history) + 1), loss_history, marker='o')
