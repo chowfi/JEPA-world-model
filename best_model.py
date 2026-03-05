@@ -385,7 +385,8 @@ if __name__ == "__main__":
     
     end = time.perf_counter()
     time_taken = end - start
-    
+    print(time_taken/60)
+
     # Plot the loss over time
     plt.figure()
     plt.plot(range(1, len(loss_history) + 1), loss_history, marker='o')

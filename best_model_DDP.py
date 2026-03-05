@@ -390,9 +390,9 @@ if __name__ == "__main__":
                 optimizer.step()
                 optimizer.zero_grad()
                 
-                # Update target encoder
+                # Update target encoder on the underlying JEPA module (DDP wrapper has no such method)
                 with torch.no_grad():
-                    model.update_target_encoder()
+                    model.module.update_target_encoder()
 
                 # TODO: device -> device.type since now device is cuda:0 / cuda:1
                 if torch.cuda.is_available():
